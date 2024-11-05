@@ -36,7 +36,7 @@ const isEntryMatch = (entry1: HAREntry, entry2: HAREntry) => {
 };
 
 // LCS - Longest Common Subsequence
-const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]) => {
+const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]): number[][] => {
   let lcs = Array(entries1.length + 1);
   for (let i = 0; i < entries1.length + 1; i++) {
     lcs[i] = Array(entries2.length + 1);
@@ -56,6 +56,28 @@ const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]) => {
   return lcs;
 };
 
+const findLCSEntries = (
+  lcs: number[][],
+  entries1: HAREntry[],
+  entries2: HAREntry[]
+): HAREntry[] => {
+  const result: HAREntry[] = [];
+  let i = entries1.length;
+  let j = entries2.length;
+  while (i !== 0 && j !== 0) {
+    if (isEntryMatch(entries1[i - 1], entries2[j - 1])) {
+      result.push(entries1[i - 1]);
+      i -= 1;
+      j -= 1;
+    } else if (lcs[i][j - 1] <= lcs[i - 1][j]) {
+      i -= 1;
+    } else {
+      j -= 1;
+    }
+  }
+  return result.reverse();
+};
+
 self.onmessage = (msg) => {
   console.log({ msg });
   const { index, file } = msg.data;
@@ -65,7 +87,13 @@ self.onmessage = (msg) => {
       try {
         files[index] = JSON.parse(event.target.result);
         if (files[0] && files[1]) {
-          console.log(computeLCS(files[0].log.entries, files[1].log.entries));
+          console.log(
+            findLCSEntries(
+              computeLCS(files[0].log.entries, files[1].log.entries),
+              files[0].log.entries,
+              files[1].log.entries
+            )
+          );
         }
       } catch (e) {
         console.error(e);
