@@ -1,3 +1,4 @@
+import { getFile, putFile } from "./db";
 import { HAREntry, Diff, DiffType, HAR, FileMessage } from "./types";
 
 const files: Record<number, HAR> = {};
@@ -11,6 +12,12 @@ const isURLMatch = (url1: string, url2: string): boolean => {
   return !!url1Re && !!url2Re && url1Re[3] === url2Re[3];
 };
 
+/**
+ * Determine whether two HAR "entry" records are equal or not.s
+ * @param entry1
+ * @param entry2
+ * @returns
+ */
 const isEntryMatch = (entry1: HAREntry, entry2: HAREntry) => {
   return (
     isURLMatch(entry1.request.url, entry2.request.url) &&
@@ -18,7 +25,12 @@ const isEntryMatch = (entry1: HAREntry, entry2: HAREntry) => {
   );
 };
 
-// LCS - Longest Common Subsequence
+/**
+ * Compute the "Longest Common Subsequence" between two HAR "entries" arrays.
+ * @param entries1
+ * @param entries2
+ * @returns
+ */
 const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]): number[][] => {
   let lcs = Array(entries1.length + 1);
   for (let i = 0; i < entries1.length + 1; i++) {
@@ -39,6 +51,12 @@ const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]): number[][] => {
   return lcs;
 };
 
+/**
+ * Calculate the differences between two HAR "entries" arrays.
+ * @param entries1
+ * @param entries2
+ * @returns
+ */
 const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
   const result: Diff[] = [];
   const lcs = computeLCS(entries1, entries2);
@@ -67,16 +85,32 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
   return result.reverse();
 };
 
+/**
+ * Calculate the diff between two HAR files and post the results back to the main thread.
+ * @param har1
+ * @param har2
+ */
+const processDiff = (har1: HAR, har2: HAR) => {
+  const diff = computeDiff(har1.log.entries, har2.log.entries);
+  self.postMessage({ type: "diff", data: diff });
+};
+
+/**
+ * Listen for new files being added.
+ * @param msg
+ */
 self.onmessage = (msg: { data: FileMessage }) => {
   const { index, file } = msg.data;
+  const { name } = file;
   var reader = new FileReader();
   reader.onload = function (event) {
     if (event.target) {
       try {
-        files[index] = JSON.parse(event.target.result);
+        const har = JSON.parse(event.target.result);
+        files[index] = har;
+        putFile({ index, har, name });
         if (files[0] && files[1]) {
-          const diff = computeDiff(files[0].log.entries, files[1].log.entries);
-          self.postMessage({ type: "diff", data: diff });
+          processDiff(files[0], files[1]);
         }
       } catch (e) {
         console.error(e);
@@ -85,3 +119,18 @@ self.onmessage = (msg: { data: FileMessage }) => {
   };
   reader.readAsText(file);
 };
+
+/**
+ * Utility to re-hydrate the diff using the last HAR files submitted.
+ */
+const init = async () => {
+  const file1 = await getFile(0);
+  const file2 = await getFile(1);
+  if (file1?.har && file2?.har) {
+    files[0] = file1.har;
+    files[1] = file2.har;
+    processDiff(file1.har, file2.har);
+  }
+};
+
+init();
