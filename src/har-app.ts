@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
-
-let w: Worker | undefined;
+import { postMessage } from "./worker-client";
+import "./diff-view";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -16,22 +16,15 @@ export class HARApp extends LitElement {
 
   constructor() {
     super();
-    if (typeof Worker !== "undefined") {
-      if (typeof w == "undefined") {
-        w = new Worker(new URL("./worker.ts", import.meta.url));
-      }
-      w.onmessage = function (event) {
-        console.log({ data: event.data });
-      };
-    } else {
+    if (typeof Worker === "undefined") {
       this.errorMessage = "Sorry! No Web Worker support.";
     }
   }
 
   createHandleHAR = (idx: 0 | 1) => (e?: HTMLInputEvent) => {
-    if (w && e?.target && e.target?.files) {
+    if (e?.target && e.target?.files) {
       const file = e.target.files[0];
-      w.postMessage({ index: idx, file });
+      postMessage({ index: idx, file });
       this.errorMessage = "";
     } else {
       this.errorMessage = "Invalid file input.";
@@ -61,6 +54,7 @@ export class HARApp extends LitElement {
           />
         </div>
         <div id="message">${this.errorMessage}</div>
+        <diff-view></diff-view>
       </div>
     </div>`;
   }
