@@ -6,6 +6,16 @@ interface HAREntry {
   };
 }
 
+enum DiffType {
+  Unchanged = "Unchanged",
+  Added = "Added",
+  Removed = "Removed",
+}
+interface Diff {
+  type: DiffType;
+  entry: HAREntry;
+}
+
 interface HAR {
   log: {
     entries: HAREntry[];
@@ -78,6 +88,34 @@ const findLCSEntries = (
   return result.reverse();
 };
 
+const diff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
+  const result: Diff[] = [];
+  const lcs = computeLCS(entries1, entries2);
+  let i = entries1.length;
+  let j = entries2.length;
+  while (i !== 0 && j !== 0) {
+    if (i == 0) {
+      result.push({ entry: entries2[i - 1], type: DiffType.Added });
+      j -= 1;
+    } else if (j === 0) {
+      result.push({ entry: entries1[i - 1], type: DiffType.Removed });
+      i -= 1;
+    } else if (isEntryMatch(entries1[i - 1], entries2[j - 1])) {
+      result.push({ entry: entries1[i - 1], type: DiffType.Unchanged });
+      i -= 1;
+      j -= 1;
+    } else if (lcs[i][j - 1] <= lcs[i - 1][j]) {
+      result.push({ entry: entries2[i - 1], type: DiffType.Added });
+      i -= 1;
+    } else {
+      result.push({ entry: entries1[i - 1], type: DiffType.Removed });
+      j -= 1;
+    }
+  }
+
+  return result.reverse();
+};
+
 self.onmessage = (msg) => {
   console.log({ msg });
   const { index, file } = msg.data;
@@ -87,13 +125,7 @@ self.onmessage = (msg) => {
       try {
         files[index] = JSON.parse(event.target.result);
         if (files[0] && files[1]) {
-          console.log(
-            findLCSEntries(
-              computeLCS(files[0].log.entries, files[1].log.entries),
-              files[0].log.entries,
-              files[1].log.entries
-            )
-          );
+          console.log(diff(files[0].log.entries, files[1].log.entries));
         }
       } catch (e) {
         console.error(e);
