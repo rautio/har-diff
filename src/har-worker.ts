@@ -1,5 +1,5 @@
 import { getFile, putFile } from "./db";
-import { HAREntry, Diff, DiffType, HAR, FileMessage } from "./types";
+import { HAREntry, Diff, DiffType, HAR, FileMessage, Summary } from "./types";
 
 const files: Record<number, HAR> = {};
 
@@ -85,6 +85,27 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
   return result.reverse();
 };
 
+const calculateSummary = (har: HAR): Summary => {
+  const duplicatesMap: Record<string, number> = {};
+  har.log.entries.forEach((entry) => {
+    const str = `${entry.request.url}🤓${entry.request.method}`;
+    duplicatesMap[str] = 1 + (duplicatesMap[str] || 0);
+  });
+  return {
+    duplicates: Object.keys(duplicatesMap)
+      .map((k) => {
+        const [url, method] = k.split("🤓");
+        return {
+          url,
+          method,
+          count: duplicatesMap[k],
+        };
+      })
+      .filter(({ count }) => count > 1)
+      .sort((a, b) => b.count - a.count),
+  };
+};
+
 /**
  * Calculate the diff between two HAR files and post the results back to the main thread.
  * @param har1
@@ -93,6 +114,11 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
 const processDiff = (har1: HAR, har2: HAR) => {
   const diff = computeDiff(har1.log.entries, har2.log.entries);
   self.postMessage({ type: "diff", data: diff });
+};
+
+const processSummary = (har: HAR, name: string) => {
+  const summary = calculateSummary(har);
+  self.postMessage({ type: "summary", data: { name, summary } });
 };
 
 /**
@@ -112,6 +138,7 @@ self.onmessage = (msg: { data: FileMessage }) => {
         if (files[0] && files[1]) {
           processDiff(files[0], files[1]);
         }
+        processSummary(har, name);
       } catch (e) {
         console.error(e);
       }
@@ -130,6 +157,8 @@ const init = async () => {
     files[0] = file1.har;
     files[1] = file2.har;
     processDiff(file1.har, file2.har);
+    processSummary(file1.har, file1.name);
+    processSummary(file2.har, file2.name);
   }
 };
 

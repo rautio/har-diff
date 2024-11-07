@@ -3,6 +3,7 @@ import { customElement, state } from "lit/decorators.js";
 import { postMessage } from "./worker-client";
 import "./nav-bar";
 import "./diff-view";
+import "./summary-view";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -66,7 +67,7 @@ export class HARApp extends LitElement {
             <diff-view></diff-view>
           </nav-item>
           <nav-item title="Summary" path="/summary">
-            <p>Hello Summary</p>
+            <summary-view></summary-view>
           </nav-item>
         </nav-bar>
       </div>

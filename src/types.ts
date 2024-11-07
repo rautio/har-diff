@@ -27,3 +27,11 @@ export interface FileMessage {
   index: 0 | 1;
   file: File;
 }
+
+export interface Summary {
+  duplicates: {
+    url: string;
+    method: string;
+    count: number;
+  }[];
+}

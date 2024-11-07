@@ -1,13 +1,19 @@
-import { Diff } from "./types";
+import { Diff, Summary } from "./types";
 
 let worker: Worker | undefined;
 
 type diffCb = (diff: Diff[]) => void;
+type summaryCb = (stats: { summary: Summary; name: string }) => void;
 
 const diffcallbacks: diffCb[] = [];
+const summaryCallbacks: summaryCb[] = [];
 
 export const onDiff = (cb: diffCb) => {
   diffcallbacks.push(cb);
+};
+
+export const onSummary = (cb: summaryCb) => {
+  summaryCallbacks.push(cb);
 };
 
 export const getWorker = (): Worker => {
@@ -20,6 +26,11 @@ export const getWorker = (): Worker => {
       switch (type) {
         case "diff":
           diffcallbacks.forEach((cb) => {
+            cb(data);
+          });
+          break;
+        case "summary":
+          summaryCallbacks.forEach((cb) => {
             cb(data);
           });
           break;
