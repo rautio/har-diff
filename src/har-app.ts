@@ -1,6 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { postMessage } from "./worker-client";
+import "./nav-bar";
 import "./diff-view";
 
 interface HTMLInputEvent extends Event {
@@ -9,7 +10,13 @@ interface HTMLInputEvent extends Event {
 
 @customElement("har-app")
 export class HARApp extends LitElement {
-  static override styles = css``;
+  static override styles = css`
+    .container {
+      margin: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+  `;
 
   @state()
   private errorMessage = "";
@@ -32,7 +39,7 @@ export class HARApp extends LitElement {
   };
   override render() {
     return html`<div>
-      <div style="display:flex; flex-direction: column">
+      <div class="container">
         <div>
           <label for="har-file">HAR 1</label
           ><input
@@ -54,7 +61,14 @@ export class HARApp extends LitElement {
           />
         </div>
         <div id="message">${this.errorMessage}</div>
-        <diff-view></diff-view>
+        <nav-bar>
+          <nav-item title="Detail" path="/">
+            <diff-view></diff-view>
+          </nav-item>
+          <nav-item title="Summary" path="/summary">
+            <p>Hello Summary</p>
+          </nav-item>
+        </nav-bar>
       </div>
     </div>`;
   }
