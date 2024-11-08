@@ -1,6 +1,8 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
+import { consume } from "@lit/context";
 import { getPath } from "./utils";
+import { filterContext, Filters } from "./filter-context";
 
 @customElement("duplicates-table")
 export class DuplicatesTable extends LitElement {
@@ -13,6 +15,10 @@ export class DuplicatesTable extends LitElement {
       text-overflow: ellipsis;
     }
   `;
+
+  @consume({ context: filterContext, subscribe: true })
+  @state()
+  public filters?: Filters;
 
   @property({ type: String })
   public name: string = "";
@@ -37,13 +43,18 @@ export class DuplicatesTable extends LitElement {
           </tr>
         </thead>
         <tbody>
-          ${this.data.map(
-            ({ url, count }) =>
-              html`<tr>
-                <td class="url" title=${url}>${getPath(url)}</td>
-                <td class="count">${count}</td>
-              </tr>`
-          )}
+          ${this.data
+            .filter(({ url }) => {
+              if (!this.filters?.exclude) return true;
+              return !url.includes(this.filters.exclude);
+            })
+            .map(
+              ({ url, count }) =>
+                html`<tr>
+                  <td class="url" title=${url}>${getPath(url)}</td>
+                  <td class="count">${count}</td>
+                </tr>`
+            )}
         </tbody>
       </table>
     </div>`;
