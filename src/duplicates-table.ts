@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { getPath } from "./utils";
 
 @customElement("duplicates-table")
 export class DuplicatesTable extends LitElement {
@@ -17,7 +18,7 @@ export class DuplicatesTable extends LitElement {
   public name: string = "";
 
   @property({ type: Array })
-  public data: { url: String; method: String; count: Number }[] = [];
+  public data: { url: string; method: string; count: number }[] = [];
 
   override render() {
     return html`<div class="duplicates">
@@ -39,7 +40,7 @@ export class DuplicatesTable extends LitElement {
           ${this.data.map(
             ({ url, count }) =>
               html`<tr>
-                <td class="url">${url}</td>
+                <td class="url" title=${url}>${getPath(url)}</td>
                 <td class="count">${count}</td>
               </tr>`
           )}
