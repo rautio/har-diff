@@ -1,28 +1,42 @@
 import { getFile, putFile } from "./db";
 import { HAREntry, Diff, DiffType, HAR, FileMessage, Summary } from "./types";
+import { getPath } from "./utils";
 
 const files: Record<number, HAR> = {};
 
-const urlRe = new RegExp("(http|https)://(.[^/]*)(.[^?]*)(.*)");
-const isURLMatch = (url1: string, url2: string): boolean => {
-  // Ignore domain
-  const url1Re = urlRe.exec(url1);
-  // URL, protocol, domain, path, query params
-  const url2Re = urlRe.exec(url2);
-  return !!url1Re && !!url2Re && url1Re[3] === url2Re[3];
-};
-
 /**
- * Determine whether two HAR "entry" records are equal or not.s
+ * Determine whether two HAR "entry" records are equal or not.
  * @param entry1
  * @param entry2
  * @returns
  */
-const isEntryMatch = (entry1: HAREntry, entry2: HAREntry) => {
-  return (
-    isURLMatch(entry1.request.url, entry2.request.url) &&
-    entry1.request.method === entry2.request.method
-  );
+const isEntryMatch = (
+  entry1: HAREntry,
+  entry2: HAREntry,
+  threshold: number = 0.75
+) => {
+  if (getMatchScore(entry1, entry2) >= threshold) return true;
+  return false;
+};
+
+/**
+ * Returns a score of how close two entries are. Max 1.
+ * @param entry1
+ * @param entry2
+ * @returns
+ */
+const getMatchScore = (entry1: HAREntry, entry2: HAREntry) => {
+  const url1 = getPath(entry1.request.url).split("/");
+  const url2 = getPath(entry2.request.url).split("/");
+  if (url1.length !== url2.length) return 0;
+  if (entry1.request.method !== entry2.request.method) return 0;
+  let matches = [];
+  for (let i = 0; i < url1.length; i++) {
+    if (url1[i] === url2[i]) {
+      matches.push(url1[i]);
+    }
+  }
+  return matches.length / url1.length;
 };
 
 /**
@@ -41,7 +55,8 @@ const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]): number[][] => {
       if (i == 0 || j == 0) {
         lcs[i][j] = 0;
       } else if (isEntryMatch(entries1[i - 1], entries2[j - 1])) {
-        lcs[i][j] = 1 + lcs[i - 1][j - 1];
+        lcs[i][j] =
+          getMatchScore(entries1[i - 1], entries2[j - 1]) + lcs[i - 1][j - 1];
       } else {
         lcs[i][j] = Math.max(lcs[i - 1][j], lcs[i][j - 1]);
       }
@@ -70,7 +85,11 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
       result.push({ entry: entries1[i - 1], type: DiffType.Removed });
       i -= 1;
     } else if (isEntryMatch(entries1[i - 1], entries2[j - 1])) {
-      result.push({ entry: entries1[i - 1], type: DiffType.Unchanged });
+      const matchScore = getMatchScore(entries1[i - 1], entries2[j - 1]);
+      result.push({
+        entry: entries1[i - 1],
+        type: matchScore === 1 ? DiffType.Unchanged : DiffType.Partial,
+      });
       i -= 1;
       j -= 1;
     } else if (lcs[i][j - 1] <= lcs[i - 1][j]) {
