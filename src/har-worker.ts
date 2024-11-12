@@ -1,6 +1,6 @@
 import { getFile, putFile } from "./db";
 import { HAREntry, Diff, DiffType, HAR, FileMessage, Summary } from "./types";
-import { getPath } from "./utils";
+import { getPath, getURLDiff } from "./utils";
 
 const files: Record<number, HAR> = {};
 
@@ -89,6 +89,7 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
       result.push({
         entry: entries1[i - 1],
         type: matchScore === 1 ? DiffType.Unchanged : DiffType.Partial,
+        secondEntry: entries2[j - 1],
       });
       i -= 1;
       j -= 1;

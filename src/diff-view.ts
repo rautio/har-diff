@@ -1,7 +1,8 @@
-import { LitElement, html, css } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { LitElement, html, css, TemplateResult } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 import { onDiff } from "./worker-client";
-import { Diff, DiffType } from "./types";
+import { Diff, DiffType, URLDiff, URLDiffType } from "./types";
+import { getURLDiff } from "./utils";
 
 interface Spacer {
   type: string;
@@ -12,6 +13,75 @@ const SPACER: Spacer = {
   type: "Spacer",
   entry: { request: { url: "" } },
 };
+
+interface PartialDiff extends Diff {
+  urlDiff: URLDiff[];
+}
+
+type DiffRender = Diff | Spacer | PartialDiff;
+
+@customElement("har-cell")
+class HARCell extends LitElement {
+  constructor() {
+    super();
+    this.diff = undefined;
+    this.type = "left";
+  }
+
+  static override styles = css`
+    .PartialAdded {
+      background-color: #018000;
+    }
+    span.PartialRemoved {
+      background-color: #fc0003;
+    }
+    .Added {
+      background-color: #018000;
+    }
+    .Removed {
+      background-color: #fc0003;
+    }
+  `;
+
+  @property({ type: Object })
+  diff: Diff | Spacer | PartialDiff | undefined;
+
+  @property()
+  type: "left" | "right" = "left";
+
+  getClass = (): string => {
+    return this.type === "left" ? "Removed" : "Added";
+  };
+
+  override render() {
+    let content: TemplateResult[] = [];
+    const diff = this.diff;
+    if (diff && diff.type !== "Spacer") {
+      if ("urlDiff" in diff && Array.isArray(diff.urlDiff)) {
+        // Partial diff
+        for (let i = 0; i < diff.urlDiff.length; i++) {
+          const { type, first, second } = diff.urlDiff[i];
+          content.push(
+            html`<span
+                class=${type === URLDiffType.Changed
+                  ? `Partial${this.getClass()}`
+                  : ""}
+                >${this.type === "left" ? first : second}</span
+              >${i !== diff.urlDiff.length - 1 ? html`<span>/</span>` : ""}`
+          );
+        }
+      } else {
+        const className =
+          this.diff?.type !== DiffType.Unchanged && this.getClass();
+        content.push(
+          html`<div class=${className || ""}>${diff.entry.request.url}</div>`
+        );
+      }
+    }
+    return content;
+  }
+}
+
 @customElement("diff-view")
 export class DiffView extends LitElement {
   static override styles = css`
@@ -25,26 +95,20 @@ export class DiffView extends LitElement {
       word-break: break-all;
       text-overflow: ellipsis;
     }
-    td.Added {
-      background-color: #018000;
-    }
-    td.Removed {
-      background-color: #fc0003;
-    }
   `;
 
   @state()
-  private leftDiff: Array<Diff | Spacer> = [];
+  private leftDiff: Array<DiffRender> = [];
 
   @state()
-  private rightDiff: Array<Diff | Spacer> = [];
+  private rightDiff: Array<DiffRender> = [];
 
   constructor() {
     super();
     onDiff((diff) => {
-      const lD: Array<Diff | Spacer> = [];
-      const rD: Array<Diff | Spacer> = [];
-      diff.forEach((d) => {
+      const lD: Array<DiffRender> = [];
+      const rD: Array<DiffRender> = [];
+      diff.forEach((d, i) => {
         if (d.type === DiffType.Added) {
           rD.push(d);
         } else if (d.type === DiffType.Removed) {
@@ -58,8 +122,17 @@ export class DiffView extends LitElement {
               arrToPush.push(SPACER);
             }
           }
-          rD.push(d);
-          lD.push(d);
+          if (d.type === DiffType.Unchanged) {
+            rD.push(d);
+            lD.push(d);
+          } else if (d.type === DiffType.Partial) {
+            const urlDiff = getURLDiff(
+              d.entry.request.url,
+              d.secondEntry?.request.url
+            );
+            rD.push({ ...d, urlDiff });
+            lD.push({ ...d, urlDiff });
+          }
         }
       });
       this.rightDiff = rD;
@@ -70,16 +143,10 @@ export class DiffView extends LitElement {
     const max = Math.max(this.leftDiff.length, this.rightDiff.length);
     const rows = [];
     for (let i = 0; i < max; i++) {
-      const ld: Diff | string =
-        i < this.leftDiff.length ? this.leftDiff[i].entry.request.url : "";
-      const rd: Diff | string =
-        i < this.rightDiff.length ? this.rightDiff[i].entry.request.url : "";
-      const lClass = ld !== "" && this.leftDiff[i].type;
-      const rClass = rd !== "" && this.rightDiff[i].type;
       rows.push(
         html`<tr>
-          <td class=${lClass}>${ld}</td>
-          <td class=${rClass}>${rd}</td>
+          <td><har-cell .diff=${this.leftDiff[i]} type="left"></har-cell></td>
+          <td><har-cell .diff=${this.rightDiff[i]} type="right"></har-cell></td>
         </tr>`
       );
     }
@@ -100,5 +167,6 @@ export class DiffView extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     "diff-view": DiffView;
+    "har-cell": HARCell;
   }
 }

@@ -12,11 +12,30 @@ export enum DiffType {
   Removed = "Removed",
   Partial = "Partial",
 }
+
+export enum URLDiffType {
+  Unchanged = DiffType.Unchanged,
+  Changed = "Changed",
+}
+
+export interface URLDiff {
+  type: URLDiffType;
+  first: string;
+  second: string;
+}
 export interface Diff {
   type: DiffType;
   entry: HAREntry;
-  // The longest common subsequence of the URLs if this is a partial match.
-  lcs?: string;
+  // Partial matches require the second entry as well
+  secondEntry?: HAREntry;
+}
+
+export interface SplitURL {
+  url: string;
+  protocol: string;
+  domain: string;
+  path: string;
+  queryParams: string;
 }
 
 export interface HAR {
