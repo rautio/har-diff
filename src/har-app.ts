@@ -7,6 +7,7 @@ import "./nav-bar";
 import "./diff-view";
 import "./summary-view";
 import "./filter-settings";
+import { WorkerMessages } from "./types";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -48,7 +49,10 @@ export class HARApp extends LitElement {
   createHandleHAR = (idx: 0 | 1) => (e?: HTMLInputEvent) => {
     if (e?.target && e.target?.files) {
       const file = e.target.files[0];
-      postMessage({ index: idx, file });
+      postMessage({
+        type: WorkerMessages.FileUpload,
+        data: { index: idx, file },
+      });
       this.errorMessage = "";
     } else {
       this.errorMessage = "Invalid file input.";

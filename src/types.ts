@@ -6,6 +6,20 @@ export interface HAREntry {
   };
 }
 
+export enum Sort {
+  Chronological = "Chronological",
+  Alphabetical = "Alphabetical",
+}
+export enum Order {
+  Asc = "Ascending",
+  Desc = "Descending",
+}
+
+export enum WorkerMessages {
+  FileUpload = "file-upload",
+  SortChange = "sort-change",
+}
+
 export enum DiffType {
   Unchanged = "Unchanged",
   Added = "Added",

@@ -1,6 +1,16 @@
 import { getFile, putFile } from "./db";
-import { HAREntry, Diff, DiffType, HAR, FileMessage, Summary } from "./types";
-import { getPath, getURLDiff } from "./utils";
+import {
+  HAREntry,
+  Diff,
+  DiffType,
+  HAR,
+  FileMessage,
+  Summary,
+  Sort,
+  Order,
+  WorkerMessages,
+} from "./types";
+import { getPath } from "./utils";
 
 const files: Record<number, HAR> = {};
 
@@ -126,13 +136,28 @@ const calculateSummary = (har: HAR): Summary => {
   };
 };
 
+const sortEntries = (
+  entries: HAREntry[],
+  sort: Sort,
+  order: Order
+): HAREntry[] => {
+  return entries;
+};
+
 /**
  * Calculate the diff between two HAR files and post the results back to the main thread.
  * @param har1
  * @param har2
  */
-const processDiff = (har1: HAR, har2: HAR) => {
-  const diff = computeDiff(har1.log.entries, har2.log.entries);
+const processDiff = (
+  har1: HAR,
+  har2: HAR,
+  sort: Sort = Sort.Chronological,
+  order: Order = Order.Asc
+) => {
+  const entries1 = sortEntries(har1.log.entries, sort, order);
+  const entries2 = sortEntries(har2.log.entries, sort, order);
+  const diff = computeDiff(entries1, entries2);
   self.postMessage({ type: "diff", data: diff });
 };
 
@@ -142,29 +167,35 @@ const processSummary = (har: HAR, name: string) => {
 };
 
 /**
- * Listen for new files being added.
+ * Listen for messages from the main thread.
  * @param msg
  */
-self.onmessage = (msg: { data: FileMessage }) => {
-  const { index, file } = msg.data;
-  const { name } = file;
-  var reader = new FileReader();
-  reader.onload = function (event) {
-    if (event.target) {
-      try {
-        const har = JSON.parse(event.target.result);
-        files[index] = har;
-        putFile({ index, har, name });
-        if (files[0] && files[1]) {
-          processDiff(files[0], files[1]);
+self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
+  switch (msg.data.type) {
+    case WorkerMessages.FileUpload:
+      const { index, file } = msg.data.data as FileMessage;
+      const { name } = file;
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        if (event.target) {
+          try {
+            const har = JSON.parse(event.target.result);
+            files[index] = har;
+            putFile({ index, har, name });
+            if (files[0] && files[1]) {
+              processDiff(files[0], files[1]);
+            }
+            processSummary(har, name);
+          } catch (e) {
+            console.error(e);
+          }
         }
-        processSummary(har, name);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-  reader.readAsText(file);
+      };
+      reader.readAsText(file);
+      break;
+    default:
+      break;
+  }
 };
 
 /**
