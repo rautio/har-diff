@@ -2,7 +2,7 @@ import { Diff, Summary } from "./types";
 
 let worker: Worker | undefined;
 
-type diffCb = (diff: Diff[]) => void;
+type diffCb = (diff: Diff[], leftName: string, rightName: string) => void;
 type summaryCb = (stats: { summary: Summary; name: string }) => void;
 
 const diffcallbacks: diffCb[] = [];
@@ -26,7 +26,7 @@ export const getWorker = (): Worker => {
       switch (type) {
         case "diff":
           diffcallbacks.forEach((cb) => {
-            cb(data);
+            cb(data.diff, data.leftName, data.rightName);
           });
           break;
         case "summary":

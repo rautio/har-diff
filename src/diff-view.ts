@@ -103,9 +103,17 @@ export class DiffView extends LitElement {
   @state()
   private rightDiff: Array<DiffRender> = [];
 
+  @state()
+  private leftName: string = "Before";
+
+  @state()
+  private rightName: string = "After";
+
   constructor() {
     super();
-    onDiff((diff) => {
+    onDiff((diff, leftName, rightName) => {
+      this.leftName = leftName;
+      this.rightName = rightName;
       const lD: Array<DiffRender> = [];
       const rD: Array<DiffRender> = [];
       diff.forEach((d, i) => {
@@ -153,8 +161,8 @@ export class DiffView extends LitElement {
     return html`<table>
       <thead>
         <tr>
-          <th>Before</th>
-          <th>After</th>
+          <th>${this.leftName}</th>
+          <th>${this.rightName}</th>
         </tr>
       </thead>
       <tbody>

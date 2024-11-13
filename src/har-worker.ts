@@ -10,10 +10,11 @@ import {
   Order,
   WorkerMessages,
   SortChangeMessage,
+  FileRecord,
 } from "./types";
 import { getPath } from "./utils";
 
-const files: Record<number, HAR> = {};
+const files: Record<number, FileRecord> = {};
 
 /**
  * Determine whether two HAR "entry" records are equal or not.
@@ -168,15 +169,18 @@ const sortEntries = (
  * @param har2
  */
 const processDiff = (
-  har1: HAR,
-  har2: HAR,
+  file1: FileRecord,
+  file2: FileRecord,
   sort: Sort = Sort.Chronological,
   order: Order = Order.Asc
 ) => {
-  const entries1 = sortEntries(har1.log.entries, sort, order);
-  const entries2 = sortEntries(har2.log.entries, sort, order);
+  const entries1 = sortEntries(file1.har.log.entries, sort, order);
+  const entries2 = sortEntries(file2.har.log.entries, sort, order);
   const diff = computeDiff(entries1, entries2);
-  self.postMessage({ type: "diff", data: diff });
+  self.postMessage({
+    type: "diff",
+    data: { diff, leftName: file1.name, rightName: file2.name },
+  });
 };
 
 const processSummary = (har: HAR, name: string) => {
@@ -210,7 +214,7 @@ self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
         if (event.target) {
           try {
             const har = JSON.parse(event.target.result);
-            files[index] = har;
+            files[index] = { har, index, name };
             putFile({ index, har, name });
             if (files[0] && files[1]) {
               processDiff(files[0], files[1]);
@@ -243,9 +247,9 @@ const init = async () => {
   const file1 = await getFile(0);
   const file2 = await getFile(1);
   if (file1?.har && file2?.har) {
-    files[0] = file1.har;
-    files[1] = file2.har;
-    processDiff(file1.har, file2.har);
+    files[0] = file1;
+    files[1] = file2;
+    processDiff(file1, file2);
     processSummary(file1.har, file1.name);
     processSummary(file2.har, file2.name);
   }

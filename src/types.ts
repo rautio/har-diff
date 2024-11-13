@@ -79,3 +79,9 @@ export interface Summary {
     count: number;
   }[];
 }
+
+export interface FileRecord {
+  index: number;
+  har: HAR;
+  name: string;
+}

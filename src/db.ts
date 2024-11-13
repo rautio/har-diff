@@ -1,5 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from "idb";
-import { HAR } from "./types";
+import { HAR, FileRecord } from "./types";
 
 const DB_NAME = "har-db";
 const DB_VERSION = 1;
@@ -34,12 +34,6 @@ const getDB = async () => {
 };
 
 getDB();
-
-interface FileRecord {
-  index: number;
-  har: HAR;
-  name: string;
-}
 
 /**
  * Store or update the HAR file saved in indexedb.
