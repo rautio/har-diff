@@ -7,8 +7,7 @@ import "./nav-bar";
 import "./diff-view";
 import "./summary-view";
 import "./filter-settings";
-import { WorkerMessages } from "./types";
-import { clearFiles } from "./db";
+import { WorkerMessages, Sort, Order } from "./types";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -64,6 +63,12 @@ export class HARApp extends LitElement {
       type: WorkerMessages.ClearAll,
     });
   };
+  handleSortChange = (e) => {
+    const selected = e.target.selectedIndex;
+    const order = e.target.options[selected].getAttribute("data-order");
+    const sort = e.target.options[selected].getAttribute("data-sort");
+    postMessage({ type: WorkerMessages.SortChange, data: { sort, order } });
+  };
 
   override render() {
     return html`<div>
@@ -89,6 +94,39 @@ export class HARApp extends LitElement {
                 accept=".json,.har"
                 @change=${this.createHandleHAR(1)}
               />
+            </div>
+            <div>
+              <label for="sort">Sort</label>
+              <select name="sort" id="sort" @change=${this.handleSortChange}>
+                <option
+                  value="ChronoAsc"
+                  data-sort=${Sort.Chronological}
+                  data-order=${Order.Asc}
+                >
+                  Chronological ↑
+                </option>
+                <option
+                  value="ChronoDesc"
+                  data-sort=${Sort.Chronological}
+                  data-order=${Order.Desc}
+                >
+                  Chronological ↓
+                </option>
+                <option
+                  value="AlphaAsc"
+                  data-sort=${Sort.Alphabetical}
+                  data-order=${Order.Asc}
+                >
+                  Alphabetical ↑
+                </option>
+                <option
+                  value="AlphaDesc"
+                  data-sort=${Sort.Alphabetical}
+                  data-order=${Order.Desc}
+                >
+                  Alphabetical ↓
+                </option>
+              </select>
             </div>
             <button @click=${this.handleClearAll}>Clear all</button>
           </div>

@@ -67,6 +67,11 @@ export interface FileMessage {
   file: File;
 }
 
+export interface SortChangeMessage {
+  sort: Sort;
+  order: Order;
+}
+
 export interface Summary {
   duplicates: {
     url: string;

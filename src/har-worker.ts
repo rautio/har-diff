@@ -9,6 +9,7 @@ import {
   Sort,
   Order,
   WorkerMessages,
+  SortChangeMessage,
 } from "./types";
 import { getPath } from "./utils";
 
@@ -141,6 +142,23 @@ const sortEntries = (
   sort: Sort,
   order: Order
 ): HAREntry[] => {
+  // By default the HAR file is stored chronologically
+  if (sort === Sort.Chronological) {
+    return order === Order.Asc ? [...entries] : [...entries].reverse();
+  }
+  if (sort === Sort.Alphabetical) {
+    return [...entries].sort((a, b) => {
+      const aUrl = a.request.url;
+      const bUrl = b.request.url;
+      if (aUrl < bUrl) {
+        return order === Order.Asc ? -1 : 1;
+      }
+      if (aUrl > bUrl) {
+        return order === Order.Asc ? 1 : -1;
+      }
+      return 0;
+    });
+  }
   return entries;
 };
 
@@ -174,6 +192,10 @@ const processClearAll = () => {
   });
 };
 
+const processSortChange = (sort: Sort, order: Order) => {
+  processDiff(files[0], files[1], sort, order);
+};
+
 /**
  * Listen for messages from the main thread.
  * @param msg
@@ -204,6 +226,10 @@ self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
     case WorkerMessages.ClearAll:
       processClearAll();
       clearFiles();
+      break;
+    case WorkerMessages.SortChange:
+      const { sort, order } = msg.data.data as SortChangeMessage;
+      processSortChange(sort, order);
       break;
     default:
       break;
