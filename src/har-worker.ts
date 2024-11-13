@@ -104,7 +104,7 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
       i -= 1;
       j -= 1;
     } else if (lcs[i][j - 1] <= lcs[i - 1][j]) {
-      result.push({ entry: entries2[i - 1], type: DiffType.Added });
+      result.push({ entry: entries2[j - 1], type: DiffType.Added });
       i -= 1;
     } else {
       result.push({ entry: entries1[i - 1], type: DiffType.Removed });
