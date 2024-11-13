@@ -8,6 +8,7 @@ import "./diff-view";
 import "./summary-view";
 import "./filter-settings";
 import { WorkerMessages } from "./types";
+import { clearFiles } from "./db";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -58,6 +59,12 @@ export class HARApp extends LitElement {
       this.errorMessage = "Invalid file input.";
     }
   };
+  handleClearAll = () => {
+    postMessage({
+      type: WorkerMessages.ClearAll,
+    });
+  };
+
   override render() {
     return html`<div>
       <div class="container">
@@ -69,7 +76,7 @@ export class HARApp extends LitElement {
                 id="har1-input"
                 type="file"
                 name="har-file"
-                accept=".json"
+                accept=".json,.har"
                 @change=${this.createHandleHAR(0)}
               />
             </div>
@@ -79,10 +86,11 @@ export class HARApp extends LitElement {
                 id="har2-input"
                 type="file"
                 name="har-file"
-                accept=".json"
+                accept=".json,.har"
                 @change=${this.createHandleHAR(1)}
               />
             </div>
+            <button @click=${this.handleClearAll}>Clear all</button>
           </div>
           <filter-settings .change=${this.changeFilters}></filter-settings>
         </div>

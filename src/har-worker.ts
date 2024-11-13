@@ -1,4 +1,4 @@
-import { getFile, putFile } from "./db";
+import { clearFiles, getFile, putFile } from "./db";
 import {
   HAREntry,
   Diff,
@@ -166,6 +166,14 @@ const processSummary = (har: HAR, name: string) => {
   self.postMessage({ type: "summary", data: { name, summary } });
 };
 
+const processClearAll = () => {
+  self.postMessage({ type: "diff", data: [] });
+  self.postMessage({
+    type: "summary",
+    data: { name, summary: { duplicates: [] } },
+  });
+};
+
 /**
  * Listen for messages from the main thread.
  * @param msg
@@ -192,6 +200,10 @@ self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
         }
       };
       reader.readAsText(file);
+      break;
+    case WorkerMessages.ClearAll:
+      processClearAll();
+      clearFiles();
       break;
     default:
       break;

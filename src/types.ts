@@ -1,3 +1,11 @@
+/**
+ * Message 'type' passed to worker thread.
+ */
+export enum WorkerMessages {
+  FileUpload = "file-upload",
+  SortChange = "sort-change",
+  ClearAll = "clear-all",
+}
 export interface HAREntry {
   time: number;
   request: {
@@ -13,11 +21,6 @@ export enum Sort {
 export enum Order {
   Asc = "Ascending",
   Desc = "Descending",
-}
-
-export enum WorkerMessages {
-  FileUpload = "file-upload",
-  SortChange = "sort-change",
 }
 
 export enum DiffType {

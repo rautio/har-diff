@@ -66,3 +66,16 @@ export const getFile = async (
   }
   return;
 };
+
+/**
+ * Delete both files from the db.
+ */
+export const clearFiles = async () => {
+  const db = await getDB();
+  if (db) {
+    await db.delete(FILES, 0);
+    await db.delete(FILES, 1);
+    return;
+  }
+  return;
+};
