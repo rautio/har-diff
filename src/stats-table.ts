@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getInitStatsBreakdown } from "./utils";
 import { StatsBreakdown } from "./types";
 
 @customElement("stats-table")
@@ -19,7 +18,7 @@ export class statsTable extends LitElement {
   public name: string = "";
 
   @property({ type: Object })
-  public data: StatsBreakdown = getInitStatsBreakdown();
+  public data: StatsBreakdown = {};
 
   override render() {
     return html`<div class="stats">
@@ -32,18 +31,36 @@ export class statsTable extends LitElement {
       </table>
       <table>
         <tbody>
-          <tr>
-            <td>Image Count</td>
-            <td>${this.data.img.count}</td>
-          </tr>
-          <tr>
-            <td>Total Count</td>
-            <td>${this.data.all.count}</td>
-          </tr>
-          <tr>
-            <td>Total Downloaded</td>
-            <td>${this.data.all.totalDownload}</td>
-          </tr>
+          ${this.data.stylesheet &&
+          html`
+            <tr>
+              <td>CSS Count</td>
+              <td>${this.data.stylesheet.count}</td>
+            </tr>
+          `}
+          ${this.data.script &&
+          html`
+            <tr>
+              <td>JS Count</td>
+              <td>${this.data.script.count}</td>
+            </tr>
+          `}
+          ${this.data.image &&
+          html`
+            <tr>
+              <td>Image Count</td>
+              <td>${this.data.image.count}</td>
+            </tr>
+          `}
+          ${this.data.all &&
+          html` <tr>
+              <td>Total Count</td>
+              <td>${this.data.all.count}</td>
+            </tr>
+            <tr>
+              <td>Total Downloaded</td>
+              <td>${this.data.all.totalDownload}</td>
+            </tr>`}
         </tbody>
       </table>
     </div>`;

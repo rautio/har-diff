@@ -19,6 +19,7 @@ export interface HAREntry {
       mimeType: string;
     };
   };
+  _resourceType?: string;
 }
 
 export enum Sort {
@@ -90,15 +91,8 @@ export interface StatsBreakdownRecord {
   avgDownload: number;
   avgTime: number;
 }
-export interface StatsBreakdown {
-  js: StatsBreakdownRecord;
-  font: StatsBreakdownRecord;
-  img: StatsBreakdownRecord;
-  css: StatsBreakdownRecord;
-  doc: StatsBreakdownRecord;
-  xhr: StatsBreakdownRecord;
-  all: StatsBreakdownRecord;
-}
+
+export type StatsBreakdown = Record<string, StatsBreakdownRecord>;
 export interface Summary {
   duplicates: {
     url: string;

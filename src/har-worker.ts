@@ -11,8 +11,9 @@ import {
   WorkerMessages,
   SortChangeMessage,
   FileRecord,
+  StatsBreakdown,
 } from "./types";
-import { getPath, getInitStatsBreakdown } from "./utils";
+import { getInitBreakdown, getPath } from "./utils";
 
 const files: Record<number, FileRecord> = {};
 
@@ -119,17 +120,20 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
 
 const calculateSummary = (har: HAR): Summary => {
   const duplicatesMap: Record<string, number> = {};
-  const breakdown = getInitStatsBreakdown();
+  const breakdown: StatsBreakdown = { all: getInitBreakdown() };
   har.log.entries.forEach((entry) => {
+    if (entry?._resourceType) {
+      if (!(entry._resourceType in breakdown)) {
+        breakdown[entry._resourceType] = getInitBreakdown();
+      }
+      breakdown[entry._resourceType].count += 1;
+      breakdown[entry._resourceType].totalDownload +=
+        entry?.response?.content?.size || 0;
+    }
+    // All
+    breakdown.all.count += 1;
     // Not all HAR files include responses
     if (entry?.response) {
-      if (entry?.response?.content?.mimeType.includes("image")) {
-        // Image type
-        breakdown.img.count += 1;
-        breakdown.img.totalDownload += entry.response.content?.size || 0;
-      }
-      // All
-      breakdown.all.count += 1;
       if (entry?.response?.content?.size) {
         breakdown.all.totalDownload += entry.response.content.size;
       }
