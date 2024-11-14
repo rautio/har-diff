@@ -1,18 +1,10 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { StatsBreakdown } from "./types";
-
+import "./stats-row";
 @customElement("stats-table")
-export class statsTable extends LitElement {
-  static override styles = css`
-    .url {
-      max-width: 50%;
-      overflow: hidden;
-      white-space: wrap;
-      word-break: break-all;
-      text-overflow: ellipsis;
-    }
-  `;
+export class StatsTable extends LitElement {
+  static override styles = css``;
 
   @property({ type: String })
   public name: string = "";
@@ -31,36 +23,13 @@ export class statsTable extends LitElement {
       </table>
       <table>
         <tbody>
-          ${this.data.stylesheet &&
-          html`
-            <tr>
-              <td>CSS Count</td>
-              <td>${this.data.stylesheet.count}</td>
-            </tr>
-          `}
-          ${this.data.script &&
-          html`
-            <tr>
-              <td>JS Count</td>
-              <td>${this.data.script.count}</td>
-            </tr>
-          `}
-          ${this.data.image &&
-          html`
-            <tr>
-              <td>Image Count</td>
-              <td>${this.data.image.count}</td>
-            </tr>
-          `}
-          ${this.data.all &&
-          html` <tr>
-              <td>Total Count</td>
-              <td>${this.data.all.count}</td>
-            </tr>
-            <tr>
-              <td>Total Downloaded</td>
-              <td>${this.data.all.totalDownload}</td>
-            </tr>`}
+          <stats-row header="JavaScript" .data=${this.data?.script}></stats-row>
+          <stats-row
+            header="Stylesheet"
+            .data=${this.data?.stylesheet}
+          ></stats-row>
+          <stats-row header="XHR" .data=${this.data?.xhr}></stats-row>
+          <stats-row header="All" .data=${this.data?.all}></stats-row>
         </tbody>
       </table>
     </div>`;
@@ -69,6 +38,6 @@ export class statsTable extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "stats-table": statsTable;
+    "stats-table": StatsTable;
   }
 }
