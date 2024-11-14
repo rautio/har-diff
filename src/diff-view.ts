@@ -4,6 +4,9 @@ import { onDiff } from "./worker-client";
 import { Diff, DiffType, URLDiff, URLDiffType } from "./types";
 import { getURLDiff } from "./utils";
 
+const LEFT_NAME = "HAR 1";
+const RIGHT_NAME = "HAR 2";
+
 interface Spacer {
   type: string;
   entry: { request: { url: string } };
@@ -88,6 +91,9 @@ export class DiffView extends LitElement {
     :host {
       max-width: 100%;
     }
+    table {
+      width: 100%;
+    }
     td {
       max-width: 50%;
       overflow: hidden;
@@ -104,16 +110,16 @@ export class DiffView extends LitElement {
   private rightDiff: Array<DiffRender> = [];
 
   @state()
-  private leftName: string = "Before";
+  private leftName: string = LEFT_NAME;
 
   @state()
-  private rightName: string = "After";
+  private rightName: string = RIGHT_NAME;
 
   constructor() {
     super();
     onDiff((diff, leftName, rightName) => {
-      this.leftName = leftName;
-      this.rightName = rightName;
+      this.leftName = leftName || LEFT_NAME;
+      this.rightName = rightName || RIGHT_NAME;
       const lD: Array<DiffRender> = [];
       const rD: Array<DiffRender> = [];
       diff.forEach((d, i) => {

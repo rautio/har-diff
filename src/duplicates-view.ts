@@ -4,8 +4,8 @@ import { onSummary } from "./worker-client";
 import { Summary } from "./types";
 import "./duplicates-table";
 
-@customElement("summary-view")
-export class SummaryView extends LitElement {
+@customElement("duplicates-view")
+export class DuplicatesView extends LitElement {
   static override styles = css`
     :host {
       max-width: 100%;
@@ -45,6 +45,6 @@ export class SummaryView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "summary-view": SummaryView;
+    "duplicates-view": DuplicatesView;
   }
 }

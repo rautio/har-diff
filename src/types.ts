@@ -5,6 +5,7 @@ export enum WorkerMessages {
   FileUpload = "file-upload",
   SortChange = "sort-change",
   ClearAll = "clear-all",
+  FilterChange = "filter-change",
 }
 export interface HAREntry {
   time: number;
@@ -70,6 +71,11 @@ export interface FileMessage {
 export interface SortChangeMessage {
   sort: Sort;
   order: Order;
+}
+
+export interface FilterChangeMessage {
+  exclude: string[]; // Maybe these could be accomplished with !() vs ()
+  include: string[];
 }
 
 export interface Summary {

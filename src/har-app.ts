@@ -5,7 +5,7 @@ import { postMessage } from "./worker-client";
 import { filterContext, Filters } from "./filter-context";
 import "./nav-bar";
 import "./diff-view";
-import "./summary-view";
+import "./duplicates-view";
 import "./filter-settings";
 import { WorkerMessages, Sort, Order } from "./types";
 
@@ -137,8 +137,8 @@ export class HARApp extends LitElement {
           <nav-item title="Detail" path="/">
             <diff-view></diff-view>
           </nav-item>
-          <nav-item title="Summary" path="/summary">
-            <summary-view></summary-view>
+          <nav-item title="Duplicates" path="/duplicates">
+            <duplicates-view></duplicates-view>
           </nav-item>
         </nav-bar>
       </div>

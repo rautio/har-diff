@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { consume, provide } from "@lit/context";
 import { filterContext, Filters } from "./filter-context";
 
+// TODO: Support multiple "tags" as filters. And use post message API to send filters
 @customElement("filter-settings")
 export class FilterSettings extends LitElement {
   constructor() {

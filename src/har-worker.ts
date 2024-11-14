@@ -189,7 +189,10 @@ const processSummary = (har: HAR, name: string) => {
 };
 
 const processClearAll = () => {
-  self.postMessage({ type: "diff", data: [] });
+  self.postMessage({
+    type: "diff",
+    data: { diff: [], leftName: null, rightName: null },
+  });
   self.postMessage({
     type: "summary",
     data: { name, summary: { duplicates: [] } },
