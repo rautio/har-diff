@@ -12,7 +12,7 @@ import {
   SortChangeMessage,
   FileRecord,
 } from "./types";
-import { getPath } from "./utils";
+import { getPath, getInitStatsBreakdown } from "./utils";
 
 const files: Record<number, FileRecord> = {};
 
@@ -119,7 +119,21 @@ const computeDiff = (entries1: HAREntry[], entries2: HAREntry[]): Diff[] => {
 
 const calculateSummary = (har: HAR): Summary => {
   const duplicatesMap: Record<string, number> = {};
+  const breakdown = getInitStatsBreakdown();
   har.log.entries.forEach((entry) => {
+    // Not all HAR files include responses
+    if (entry?.response) {
+      if (entry?.response?.content?.mimeType.includes("image")) {
+        // Image type
+        breakdown.img.count += 1;
+        breakdown.img.totalDownload += entry.response.content?.size || 0;
+      }
+      // All
+      breakdown.all.count += 1;
+      if (entry?.response?.content?.size) {
+        breakdown.all.totalDownload += entry.response.content.size;
+      }
+    }
     const str = `${entry.request.url}🤓${entry.request.method}`;
     duplicatesMap[str] = 1 + (duplicatesMap[str] || 0);
   });
@@ -135,6 +149,9 @@ const calculateSummary = (har: HAR): Summary => {
       })
       .filter(({ count }) => count > 1)
       .sort((a, b) => b.count - a.count),
+    stats: {
+      breakdown,
+    },
   };
 };
 

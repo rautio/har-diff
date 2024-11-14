@@ -13,6 +13,12 @@ export interface HAREntry {
     url: string;
     method: string;
   };
+  response?: {
+    content?: {
+      size: number;
+      mimeType: string;
+    };
+  };
 }
 
 export enum Sort {
@@ -78,12 +84,30 @@ export interface FilterChangeMessage {
   include: string[];
 }
 
+export interface StatsBreakdownRecord {
+  count: number;
+  totalDownload: number;
+  avgDownload: number;
+  avgTime: number;
+}
+export interface StatsBreakdown {
+  js: StatsBreakdownRecord;
+  font: StatsBreakdownRecord;
+  img: StatsBreakdownRecord;
+  css: StatsBreakdownRecord;
+  doc: StatsBreakdownRecord;
+  xhr: StatsBreakdownRecord;
+  all: StatsBreakdownRecord;
+}
 export interface Summary {
   duplicates: {
     url: string;
     method: string;
     count: number;
   }[];
+  stats: {
+    breakdown: StatsBreakdown;
+  };
 }
 
 export interface FileRecord {

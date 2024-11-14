@@ -2,15 +2,15 @@ import { LitElement, html, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { onSummary } from "./worker-client";
 import { Summary } from "./types";
-import "./duplicates-table";
+import "./stats-table";
 
-@customElement("duplicates-view")
-export class DuplicatesView extends LitElement {
+@customElement("stats-view")
+export class StatsView extends LitElement {
   static override styles = css`
     :host {
       max-width: 100%;
     }
-    .duplicates {
+    .stats {
       display: flex;
     }
   `;
@@ -28,23 +28,23 @@ export class DuplicatesView extends LitElement {
   override render() {
     const names = Object.keys(this.summaries);
     if (names.length !== 2) return null;
-    const left = this.summaries[names[0]].duplicates;
-    const right = this.summaries[names[1]].duplicates;
-    return html`<div class="duplicates">
-      <duplicates-table
+    const left = this.summaries[names[0]].stats.breakdown;
+    const right = this.summaries[names[1]].stats.breakdown;
+    return html`<div class="stats">
+      <stats-table
         name=${names.length > 0 && names[0]}
         .data=${left}
-      ></duplicates-table>
-      <duplicates-table
+      ></stats-table>
+      <stats-table
         name=${names.length > 1 && names[1]}
         .data=${right}
-      ></duplicates-table>
+      ></stats-table>
     </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "duplicates-view": DuplicatesView;
+    "stats-view": StatsView;
   }
 }

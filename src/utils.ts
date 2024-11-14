@@ -1,4 +1,10 @@
-import { URLDiff, URLDiffType, SplitURL } from "./types";
+import {
+  URLDiff,
+  URLDiffType,
+  SplitURL,
+  StatsBreakdown,
+  StatsBreakdownRecord,
+} from "./types";
 
 export const urlRegex = new RegExp("(http|https)://(.[^/]*)(.[^?]*)(.*)");
 export const uuidRegex = new RegExp(
@@ -62,4 +68,19 @@ export const getURLDiff = (url1: string, url2: string = ""): URLDiff[] => {
     result.push({ type, first: split1[i], second: split2[i] });
   }
   return result;
+};
+
+export const getInitStatsBreakdown = (): StatsBreakdown => {
+  const keys = ["js", "css", "font", "doc", "xhr", "img", "all"];
+  const initBreakdown: StatsBreakdownRecord = {
+    count: 0,
+    totalDownload: 0,
+    avgDownload: 0,
+    avgTime: 0,
+  };
+  const result = {};
+  keys.forEach((k) => {
+    result[k] = { ...initBreakdown };
+  });
+  return result as StatsBreakdown;
 };

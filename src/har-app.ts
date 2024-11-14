@@ -3,11 +3,12 @@ import { provide } from "@lit/context";
 import { customElement, state } from "lit/decorators.js";
 import { postMessage } from "./worker-client";
 import { filterContext, Filters } from "./filter-context";
+import { WorkerMessages, Sort, Order } from "./types";
 import "./nav-bar";
 import "./diff-view";
 import "./duplicates-view";
+import "./stats-view";
 import "./filter-settings";
-import { WorkerMessages, Sort, Order } from "./types";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -136,6 +137,9 @@ export class HARApp extends LitElement {
         <nav-bar>
           <nav-item title="Detail" path="/">
             <diff-view></diff-view>
+          </nav-item>
+          <nav-item title="Stats" path="/stats">
+            <stats-view></stats-view>
           </nav-item>
           <nav-item title="Duplicates" path="/duplicates">
             <duplicates-view></duplicates-view>
