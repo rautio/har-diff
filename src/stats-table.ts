@@ -4,7 +4,11 @@ import { StatsBreakdown } from "./types";
 import "./stats-row";
 @customElement("stats-table")
 export class StatsTable extends LitElement {
-  static override styles = css``;
+  static override styles = css`
+    :host {
+      margin: 12px;
+    }
+  `;
 
   @property({ type: String })
   public name: string = "";
