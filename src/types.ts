@@ -87,8 +87,7 @@ export interface FilterChangeMessage {
 
 export interface StatsBreakdownRecord {
   count: number;
-  totalDownload: number;
-  avgDownload: number;
+  size: number;
   avgTime: number;
 }
 

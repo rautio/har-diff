@@ -73,7 +73,7 @@ export const getURLDiff = (url1: string, url2: string = ""): URLDiff[] => {
 export const getInitBreakdown = (): StatsBreakdownRecord => {
   const initBreakdown = {
     count: 0,
-    totalDownload: 0,
+    size: 0,
     avgDownload: 0,
     avgTime: 0,
   };

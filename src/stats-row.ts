@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { StatsBreakdown } from "./types";
+import { StatsBreakdownRecord } from "./types";
 import { formatBytes } from "./utils";
 
 @customElement("stats-row")
@@ -14,6 +14,7 @@ export class StatsRow extends LitElement {
       width: 100%;
     }
     th {
+      text-transform: capitalize;
       text-align: left;
     }
     .metric {
@@ -28,7 +29,7 @@ export class StatsRow extends LitElement {
   public header: string = "";
 
   @property({ type: Object })
-  public data: StatsBreakdown = {};
+  public data: StatsBreakdownRecord = {};
 
   override render() {
     if (!this.header || !this.data) return null;
@@ -41,7 +42,7 @@ export class StatsRow extends LitElement {
       </tr>
       <tr>
         <td class="field">Size</td>
-        <td class="metric">${formatBytes(this.data.totalDownload)}</td>
+        <td class="metric">${formatBytes(this.data.size)}</td>
       </tr>`;
   }
 }

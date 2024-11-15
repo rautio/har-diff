@@ -123,19 +123,23 @@ const calculateSummary = (har: HAR): Summary => {
   const breakdown: StatsBreakdown = { all: getInitBreakdown() };
   har.log.entries.forEach((entry) => {
     if (entry?._resourceType) {
-      if (!(entry._resourceType in breakdown)) {
-        breakdown[entry._resourceType] = getInitBreakdown();
+      let type = entry._resourceType;
+      // fetch and xhr are separate types
+      if (type === "fetch" || type === "xhr") {
+        type = "fetch/XHR";
       }
-      breakdown[entry._resourceType].count += 1;
-      breakdown[entry._resourceType].totalDownload +=
-        entry?.response?.content?.size || 0;
+      if (!(type in breakdown)) {
+        breakdown[type] = getInitBreakdown();
+      }
+      breakdown[type].count += 1;
+      breakdown[type].size += entry?.response?.content?.size || 0;
     }
     // All
     breakdown.all.count += 1;
     // Not all HAR files include responses
     if (entry?.response) {
       if (entry?.response?.content?.size) {
-        breakdown.all.totalDownload += entry.response.content.size;
+        breakdown.all.size += entry.response.content.size;
       }
     }
     const str = `${entry.request.url}🤓${entry.request.method}`;
