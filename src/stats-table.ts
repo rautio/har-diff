@@ -25,8 +25,6 @@ export class StatsTable extends LitElement {
             <th>${this.name}</th>
           </tr>
         </thead>
-      </table>
-      <table>
         <tbody>
           ${Object.keys(this.data)
             .sort()
