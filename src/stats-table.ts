@@ -5,6 +5,11 @@ import "./stats-row";
 
 @customElement("stats-table")
 export class StatsTable extends LitElement {
+  constructor() {
+    super();
+    this.data = {};
+    this.name = "";
+  }
   static override styles = css`
     :host {
       margin: 12px;
@@ -12,10 +17,10 @@ export class StatsTable extends LitElement {
   `;
 
   @property({ type: String })
-  public name: string = "";
+  public name: string;
 
   @property({ type: Object })
-  public data: StatsBreakdown = {};
+  public data: StatsBreakdown;
 
   override render() {
     return html`<div class="stats">

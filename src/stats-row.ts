@@ -5,6 +5,11 @@ import { formatBytes } from "./utils";
 
 @customElement("stats-row")
 export class StatsRow extends LitElement {
+  constructor() {
+    super();
+    this.data = { count: 0, size: 0, avgTime: 0 };
+    this.header = "";
+  }
   static override styles = css`
     :host {
       display: table;
@@ -26,10 +31,10 @@ export class StatsRow extends LitElement {
   `;
 
   @property({ type: String })
-  public header: string = "";
+  public header: string;
 
   @property({ type: Object })
-  public data: StatsBreakdownRecord = {};
+  public data: StatsBreakdownRecord;
 
   override render() {
     if (!this.header || !this.data) return null;
