@@ -1,10 +1,4 @@
-import {
-  URLDiff,
-  URLDiffType,
-  SplitURL,
-  StatsBreakdown,
-  StatsBreakdownRecord,
-} from "./types";
+import { URLDiff, URLDiffType, SplitURL, StatsBreakdownRecord } from "./types";
 
 export const urlRegex = new RegExp("(http|https)://(.[^/]*)(.[^?]*)(.*)");
 export const uuidRegex = new RegExp(
