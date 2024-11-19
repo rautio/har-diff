@@ -43,7 +43,7 @@ const getMatchScore = (entry1: HAREntry, entry2: HAREntry) => {
   const url2 = getPath(entry2.request.url).split("/");
   if (url1.length !== url2.length) return 0;
   if (entry1.request.method !== entry2.request.method) return 0;
-  let matches = [];
+  const matches = [];
   for (let i = 0; i < url1.length; i++) {
     if (url1[i] === url2[i]) {
       matches.push(url1[i]);
@@ -59,7 +59,7 @@ const getMatchScore = (entry1: HAREntry, entry2: HAREntry) => {
  * @returns
  */
 const computeLCS = (entries1: HAREntry[], entries2: HAREntry[]): number[][] => {
-  let lcs = Array(entries1.length + 1);
+  const lcs = Array(entries1.length + 1);
   for (let i = 0; i < entries1.length + 1; i++) {
     lcs[i] = Array(entries2.length + 1);
   }
@@ -234,10 +234,10 @@ const processSortChange = (sort: Sort, order: Order) => {
  */
 self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
   switch (msg.data.type) {
-    case WorkerMessages.FileUpload:
+    case WorkerMessages.FileUpload: {
       const { index, file } = msg.data.data as FileMessage;
       const { name } = file;
-      var reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = function (event) {
         if (event.target) {
           try {
@@ -255,14 +255,17 @@ self.onmessage = (msg: { data: { type: WorkerMessages; data: unknown } }) => {
       };
       reader.readAsText(file);
       break;
-    case WorkerMessages.ClearAll:
+    }
+    case WorkerMessages.ClearAll: {
       processClearAll();
       clearFiles();
       break;
-    case WorkerMessages.SortChange:
+    }
+    case WorkerMessages.SortChange: {
       const { sort, order } = msg.data.data as SortChangeMessage;
       processSortChange(sort, order);
       break;
+    }
     default:
       break;
   }

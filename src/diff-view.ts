@@ -57,7 +57,7 @@ class HARCell extends LitElement {
   };
 
   override render() {
-    let content: TemplateResult[] = [];
+    const content: TemplateResult[] = [];
     const diff = this.diff;
     if (diff && diff.type !== "Spacer") {
       if ("urlDiff" in diff && Array.isArray(diff.urlDiff)) {
@@ -122,7 +122,7 @@ export class DiffView extends LitElement {
       this.rightName = rightName || RIGHT_NAME;
       const lD: Array<DiffRender> = [];
       const rD: Array<DiffRender> = [];
-      diff.forEach((d, i) => {
+      diff.forEach((d) => {
         if (d.type === DiffType.Added) {
           rD.push(d);
         } else if (d.type === DiffType.Removed) {

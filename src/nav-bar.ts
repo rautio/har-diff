@@ -42,7 +42,7 @@ class NavBar extends LitElement {
     return slot ? slot.assignedElements() : [];
   }
   selectItem(selected: Item) {
-    for (let item of this.items) {
+    for (const item of this.items) {
       item.selected = item == selected;
       if (item.selected && item.path) {
         window.history.pushState("", "", item.path);
@@ -53,7 +53,7 @@ class NavBar extends LitElement {
   override firstUpdated(args) {
     super.firstUpdated(args);
     const { pathname } = window.location;
-    let selectedItem = this.items.find((item) => item.path === pathname);
+    const selectedItem = this.items.find((item) => item.path === pathname);
     this.selectItem(selectedItem || this.items[0]);
   }
   override render() {
@@ -71,7 +71,7 @@ class NavBar extends LitElement {
             </span>`
         )}
       </nav>
-      <slot class="content" @slotchange=${(ev) => this.requestUpdate()}></slot>
+      <slot class="content" @slotchange=${() => this.requestUpdate()}></slot>
     `;
   }
 }
@@ -84,7 +84,7 @@ class NavItem extends LitElement {
     }
   `;
   @property({ type: Boolean, reflect: true })
-  public selected: Boolean = false;
+  public selected: boolean = false;
   @property({ type: String, reflect: true })
   public override title: string = "";
   @property({ type: String })

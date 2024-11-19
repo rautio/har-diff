@@ -22,19 +22,21 @@ export const getWorker = (): Worker => {
       type: "module",
     });
     worker.onmessage = (msg) => {
-      const { type, data } = msg?.data;
-      switch (type) {
-        case "diff":
-          diffcallbacks.forEach((cb) => {
-            cb(data.diff, data.leftName, data.rightName);
-          });
-          break;
-        case "summary":
-          summaryCallbacks.forEach((cb) => {
-            cb(data);
-          });
-          break;
-        default:
+      if (msg && msg?.data) {
+        const { type, data } = msg.data;
+        switch (type) {
+          case "diff":
+            diffcallbacks.forEach((cb) => {
+              cb(data.diff, data.leftName, data.rightName);
+            });
+            break;
+          case "summary":
+            summaryCallbacks.forEach((cb) => {
+              cb(data);
+            });
+            break;
+          default:
+        }
       }
     };
   }
