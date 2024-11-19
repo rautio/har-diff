@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
-import { getPath } from "./utils";
+import { getPath, getInitBreakdown } from "./utils";
 import { filterContext, Filters } from "./filter-context";
 
 @customElement("duplicates-table")
