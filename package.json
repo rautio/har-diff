@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "prepare": "husky install"
   },
   "keywords": [
     "har",
@@ -35,7 +36,7 @@
     "eslint": "^9.15.0",
     "eslint-plugin-lit": "^1.15.0",
     "globals": "^15.12.0",
-    "husky": "^9.1.7",
+    "husky": "^8.0.0",
     "lint-staged": "^15.2.10",
     "lit-analyzer": "^2.0.3",
     "prettier": "^2.6.2",
